@@ -3,34 +3,31 @@ import SwiftUI
 struct ContentView: View {
     @State private var docURL: String = "https://disk.yandex.kz/i/rvROJJyrFbeAmg"
     @State private var isRunning = false
-    @State private var statusLog = "Туннель остановлен"
+    @State private var status = "Отключено"
 
     var body: some View {
-        VStack(spacing: 20) {
-            Text("OpenFlux Client")
-                .font(.largeTitle)
-                .bold()
-
-            TextField("URL документа Yandex", text: $docURL)
+        VStack(spacing: 24) {
+            Text("OpenFlux")
+                .font(.system(size: 32, weight: .bold))
+            
+            TextField("URL Яндекс Документа", text: $docURL)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .padding(.horizontal)
 
             Button(action: toggleTunnel) {
-                Text(isRunning ? "Остановить" : "Запустить туннель")
+                Text(isRunning ? "Остановить" : "Подключить")
                     .font(.headline)
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .padding()
                     .background(isRunning ? Color.red : Color.blue)
-                    .cornerRadius(10)
+                    .cornerRadius(12)
             }
             .padding(.horizontal)
 
-            Text(statusLog)
-                .font(.subheadline)
-                .foregroundColor(.gray)
-                .multilineTextAlignment(.center)
-                .padding()
+            Text(status)
+                .font(.footnote)
+                .foregroundColor(.secondary)
         }
         .padding()
     }
@@ -38,15 +35,15 @@ struct ContentView: View {
     func toggleTunnel() {
         if !isRunning {
             isRunning = true
-            statusLog = "SOCKS5 запущен на 127.0.0.1:1080"
+            status = "SOCKS5 запущен на 127.0.0.1:1080"
             DispatchQueue.global(qos: .background).async {
-                if let cUrl = strdup(docURL) {
-                    RunMainClient(cUrl)
+                if let cStr = strdup(docURL) {
+                    RunMainClient(cStr)
                 }
             }
         } else {
             isRunning = false
-            statusLog = "Перезапустите приложение для смены сессии"
+            status = "Для смены сессии перезапустите приложение"
         }
     }
 }

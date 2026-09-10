@@ -1,1 +1,1 @@
-#import "../output/ios/liboflux.h"
+#import "liboflux.h"

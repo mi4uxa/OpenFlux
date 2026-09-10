@@ -1,0 +1,55 @@
+name: Build OpenFlux IPA
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build-ipa:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.26'
+
+      - name: Build Go C-Archive
+        run: |
+          chmod +x build_ios.sh
+          ./build_ios.sh
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode Project
+        run: xcodegen generate
+
+      - name: Build App
+        run: |
+          xcodebuild -project OpenFlux.xcodeproj \
+            -scheme OpenFlux \
+            -configuration Release \
+            -sdk iphoneos \
+            -derivedDataPath DerivedData \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            build
+
+      - name: Create IPA Package
+        run: |
+          mkdir -p Payload
+          cp -r DerivedData/Build/Products/Release-iphoneos/OpenFlux.app Payload/
+          zip -r OpenFlux.ipa Payload
+
+      - name: Upload IPA Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: OpenFlux-IPA
+          path: OpenFlux.ipa
+          retention-days: 7
