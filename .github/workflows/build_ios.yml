@@ -1,4 +1,4 @@
-name: Build iOS Library
+name: Build iOS IPA
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-ios:
+  build-ipa:
     runs-on: macos-latest
 
     steps:
@@ -17,17 +17,39 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: '1.26'
-          cache: true
 
-      - name: Make build script executable
-        run: chmod +x build_ios.sh
+      - name: Build C-Archive Library
+        run: |
+          chmod +x build_ios.sh
+          ./build_ios.sh
 
-      - name: Build iOS static library
-        run: ./build_ios.sh
+      - name: Install XcodeGen
+        run: brew install xcodegen
 
-      - name: Upload iOS Library Artifacts
+      - name: Generate Xcode Project
+        run: xcodegen generate
+
+      - name: Build App Bundle
+        run: |
+          xcodebuild -project OpenFlux.xcodeproj \
+            -scheme OpenFlux \
+            -configuration Release \
+            -sdk iphoneos \
+            -derivedDataPath DerivedData \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            build
+
+      - name: Package to IPA
+        run: |
+          mkdir -p Payload
+          cp -r DerivedData/Build/Products/Release-iphoneos/OpenFlux.app Payload/
+          zip -r OpenFlux.ipa Payload
+
+      - name: Upload IPA Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ios-liboflux
-          path: output/ios/
+          name: OpenFlux-IPA
+          path: OpenFlux.ipa
           retention-days: 7
