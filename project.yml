@@ -9,11 +9,13 @@ targets:
     platform: iOS
     sources:
       - path: ios/Sources
+    info:
+      path: ios/Info.plist
     settings:
       PRODUCT_BUNDLE_IDENTIFIER: com.openflux.client
-      SWIFT_OBJC_BRIDGING_HEADER: ios/Bridging-Header.h
-      HEADER_SEARCH_PATHS: output/ios
-      LIBRARY_SEARCH_PATHS: output/ios
-      OTHER_LDFLAGS: "$(inherited) -lresolv output/ios/liboflux.a"
+      SWIFT_OBJC_BRIDGING_HEADER: $(SRCROOT)/ios/Bridging-Header.h
+      HEADER_SEARCH_PATHS: $(SRCROOT)/output/ios
+      LIBRARY_SEARCH_PATHS: $(SRCROOT)/output/ios
+      OTHER_LDFLAGS: "$(inherited) -lresolv $(SRCROOT)/output/ios/liboflux.a"
       CODE_SIGNING_ALLOWED: NO
       CODE_SIGNING_REQUIRED: NO
